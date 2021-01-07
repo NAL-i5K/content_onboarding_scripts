@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 from __future__ import absolute_import
 from subprocess import Popen, PIPE, call
 import json
