@@ -80,7 +80,7 @@ def create_updateOrganismPermission_str(name, organism, admin, read, write, expo
 # ADD ORGANISM
 p = Popen(create_findAllOrganism_str(), stdout=PIPE, stderr=None, shell=True)
 output, err = p.communicate()
-msg = output.split('\n')[-1]
+msg = output.split(b'\n')[-1]
 d = json.loads(msg)
 
 is_organism_existed = False
@@ -115,7 +115,7 @@ else:
 # ADD GROUPS
 p = Popen(create_loadGroups_str(), stdout=PIPE, stderr=None, shell=True)
 output, err = p.communicate()
-msg = output.split('\n')[-1]
+msg = output.split(b'\n')[-1]
 d = json.loads(msg)
 is_group_admin_existed = False
 is_group_read_existed = False
