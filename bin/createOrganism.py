@@ -98,7 +98,7 @@ if is_organism_existed:
 else:
     p = Popen(create_insertOrganism_str(commonName, genus, species, directory, blatdb, str(publicMode), token), stdout=PIPE, stderr=None, shell=True)
     output, err = p.communicate()
-    msg = output.split('\n')[-1]
+    msg = output.split(b'\n')[-1]
     d = json.loads(msg)
     if 'error' in d:
         print("Create organism: fails, error:" + d['error'])
