@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import sys
 import argparse
 import time
-from arrow.apollo import get_apollo_instance
+from apollo import ApolloInstance
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description='''
 ''')
@@ -19,7 +19,7 @@ parser.add_argument('-username', help="", required=True)
 parser.add_argument('-password', help="", required=True)
  
 args = parser.parse_args()
-
+host = args.host
 organism = args.organism
 commonName = organism
 genus = args.genus
@@ -28,6 +28,15 @@ directory = args.directory
 blatdb = args.blatdb
 publicMode = args.publicMode
 token = args.token
+ADMIN = args.username
+PASSWD = args.password
+
+def connect():
+    """Coonnect to Apollo instance based on the 
+        host, admin and password args passed to the
+        createOrganism script
+    """
+    return ApolloInstance(host, ADMIN,  PASSWD)
 
 def organism_exists(commonName):
     """Check if an organism exists
@@ -35,7 +44,7 @@ def organism_exists(commonName):
     Args:
         commonName: Organism's Common Name
     """
-    wa = get_apollo_instance()
+    wa = connect()
     exists = False
     response = wa.organisms.get_organisms()
     if isinstance(response, dict):
@@ -63,7 +72,7 @@ def create_organism(commonName, genus, species, directory, blatdb, publicMode, t
         token: Not really sure
 
     """
-    wa = get_apollo_instance()
+    wa = connect()
     try:
         orgs = wa.organisms.add_organism(
             commonName,
@@ -87,7 +96,7 @@ def create_groups(organism, genus, species):
         genus: Organism's Genus
         species: Organism's Species
     """
-    wa = get_apollo_instance()
+    wa = connect()
     existing_groups = [group.get("name") for group in wa.groups.get_groups()]
     prefix = f"{genus}_{species}"
 
