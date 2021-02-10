@@ -25,7 +25,7 @@ open ( my $OUT, ">$tl" ) or die "can't open $tl\n";
 while ( my $line = <$TL> ){
     chomp $line;
     if ( $line =~ /"urlTemplate" : "bigwig\/$gc"/ ){
-	if ( $line =~ /,$/ ){
+	if ( $line =~ /,\s*$/ ){
 	    print $OUT "$line\n$gc_metadata,\n";
 	}
 	else {
@@ -33,7 +33,7 @@ while ( my $line = <$TL> ){
 	}
     }
     elsif ( $line =~ /"urlTemplate" : "bigwig\/$gap"/ ){
-	if ( $line =~ /,$/ ){
+	if ( $line =~ /,\s*$/ ){
 	    print $OUT "$line\n$gap_metadata,\n";
 	}
 	else {
