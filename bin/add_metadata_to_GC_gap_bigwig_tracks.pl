@@ -29,7 +29,7 @@ while ( my $line = <$TL> ){
 	    print $OUT "$line\n$gc_metadata,\n";
 	}
 	else {
-            print $OUT "$line\n$gc_metadata\n";
+            print $OUT "$line,\n$gc_metadata\n";
 	}
     }
     elsif ( $line =~ /"urlTemplate" : "bigwig\/$gap"/ ){
@@ -37,7 +37,7 @@ while ( my $line = <$TL> ){
 	    print $OUT "$line\n$gap_metadata,\n";
 	}
 	else {
-	    print $OUT "$line\n$gap_metadata\n";
+	    print $OUT "$line,\n$gap_metadata\n";
 	}
     }
     else {
