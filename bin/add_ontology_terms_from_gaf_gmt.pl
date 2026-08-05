@@ -16,7 +16,7 @@ Required:
 Optional:
     --egap     Set this flag if the GFF3 uses EGAP-style matching via CDS protein_id.
     --cds      Also add Ontology_term attributes to CDS features.
-  --out      Output GFF3 file (default: <input>.with_ontology_terms.gff3)
+  --out      Output GFF3 file (default: <input>.annotated.gff3)
   --help     Print this help text
 };
 
@@ -39,7 +39,7 @@ if ($help) {
 die $usage unless defined $gff_file && defined $gaf_file && defined $gmt_file;
 
 if (!defined $out_file) {
-    $out_file = $gff_file . '.with_ontology_terms.gff3';
+    $out_file = $gff_file . '.annotated.gff3';
 }
 
 
