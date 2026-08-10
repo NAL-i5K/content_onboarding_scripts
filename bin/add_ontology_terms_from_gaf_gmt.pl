@@ -6,7 +6,7 @@ use Getopt::Long;
 
 my $usage = qq{
 Usage:
-    perl $0 --gff input.gff3 --gaf input.gaf.tsv --gmt input.gmt [--egap] [--cds] [--out output.gff3]
+    perl $0 --gff input.gff3 --gaf input.gaf.tsv --gmt input.gmt [--egap] [--ensembl] [--cds] [--out output.gff3]
 
 Required:
   --gff      Input GFF3 file
@@ -15,18 +15,20 @@ Required:
 
 Optional:
     --egap     Set this flag if the GFF3 uses EGAP-style matching via CDS protein_id.
+    --ensembl Assume GAF/GMT IDs use a -P[A-Z]+ suffix and map them to GFF-style -R[A-Z]+ for matching.
     --cds      Also add Ontology_term attributes to CDS features.
   --out      Output GFF3 file (default: <input>.annotated.gff3)
   --help     Print this help text
 };
 
-my ($gff_file, $gaf_file, $gmt_file, $out_file, $is_egap, $annotate_cds, $help);
+my ($gff_file, $gaf_file, $gmt_file, $out_file, $is_egap, $is_ensembl, $annotate_cds, $help);
 GetOptions(
     'gff=s'    => \$gff_file,
     'gaf=s'    => \$gaf_file,
     'gmt=s'    => \$gmt_file,
     'out=s'    => \$out_file,
         'egap!'    => \$is_egap,
+        'ensembl!' => \$is_ensembl,
         'cds!'     => \$annotate_cds,
     'help|h'   => \$help,
 ) or die $usage;
@@ -45,8 +47,8 @@ if (!defined $out_file) {
 
 my %terms_by_key;
 my $custom_pragma = '##Gene Ontology (GO) annotations are derived from GOAnna and InterProScan. KEGG, Reactome, and FlyBase pathway annotations are derived from PathAnnotator. For more information about the functional annotation protocol, see https://dx.doi.org/10.17504/protocols.io.dm6gp7n6jgzp/v1';
-load_gaf_terms($gaf_file, \%terms_by_key);
-load_gmt_terms($gmt_file, \%terms_by_key);
+load_gaf_terms($gaf_file, \%terms_by_key, $is_ensembl);
+load_gmt_terms($gmt_file, \%terms_by_key, $is_ensembl);
 
 my %warned_prefixed_protein_ids;
 
@@ -163,7 +165,7 @@ warn "Updated Ontology_term on $mrna_updated mRNA features and $cds_updated CDS 
 
 
 sub load_gaf_terms {
-    my ($file, $terms_href) = @_;
+    my ($file, $terms_href, $ensembl_mode) = @_;
 
     open(my $GAF, '<', $file) or die "Cannot open $file: $!\n";
     while (my $line = <$GAF>) {
@@ -174,7 +176,7 @@ sub load_gaf_terms {
         my @c = split /\t/, $line;
         next unless @c >= 10;
 
-        my $key    = $c[1];
+        my $key    = normalize_ensembl_id_for_match($c[1], $ensembl_mode);
         my $go_id  = $c[4];
         next unless defined $key && defined $go_id;
         next if $key eq '' || $go_id eq '';
@@ -186,7 +188,7 @@ sub load_gaf_terms {
 
 
 sub load_gmt_terms {
-    my ($file, $terms_href) = @_;
+    my ($file, $terms_href, $ensembl_mode) = @_;
 
     my %db_map = (
         'FlyBase_pathway'        => 'FlyBase',
@@ -216,10 +218,21 @@ sub load_gmt_terms {
             $member =~ s/^\s+//;
             $member =~ s/\s+$//;
             next if $member eq '';
+            $member = normalize_ensembl_id_for_match($member, $ensembl_mode);
             add_term_for_key($terms_href, $member, $term);
         }
     }
     close $GMT;
+}
+
+
+sub normalize_ensembl_id_for_match {
+    my ($id, $ensembl_mode) = @_;
+    return $id unless defined $id;
+    return $id unless $ensembl_mode;
+
+    $id =~ s/-P([A-Z]+)$/-R$1/;
+    return $id;
 }
 
 
